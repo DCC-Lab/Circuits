@@ -58,14 +58,18 @@ class Divider:
         self.z2 = z2
         self.zt = z1.inSeriesWith(z2)
 
+    def voltage(self, frequency):
+        return self.z1.Z(frequency)/self.zt.Z(frequency)
+
     def showResponse(self):
         amplitude = []
         phase = []
 
         frequencies = 10**(linspace(-1,6,100))
         for f in frequencies:
-            amplitude.append( abs(self.z1.Z(f)/self.zt.Z(f)))
-            phase.append( angle(self.z1.Z(f)/self.zt.Z(f)))
+            v = self.voltage(f)
+            amplitude.append(abs(v))
+            phase.append(angle(f))
         fig,(axis1,axis2) = plt.subplots(1,2, sharex=True,figsize=(10,5))
         axis1.plot(frequencies, amplitude,'k')
         plt.xscale('log')
@@ -102,6 +106,41 @@ class Inductor(Impedance):
     def impedance(self, frequency):
         return 1j*2*pi*frequency*self.L
 
+class OpAmp:
+    def __init__(self, vp, vn):
+        self.vp = vp
+        self.vn = vn
+    def showResponse(self):
+        vps = []
+        phaseps = []
+        vns = []
+        phasens = []
+
+        frequencies = 10**(linspace(-1,6,100))
+        for f in frequencies:
+            vp = self.vp.voltage(f)
+            vps.append(abs(vp))
+            phaseps.append(angle(vp))
+            vn = self.vn.voltage(f)
+            vns.append(abs(vn))
+            phasens.append(angle(vn))
+        fig,(axis1,axis2) = plt.subplots(1,2, sharex=True,figsize=(10,5))
+        axis1.plot(frequencies, vps,'k')
+        axis1.plot(frequencies, vns,'k')
+        plt.xscale('log')
+        axis2.plot(frequencies, phaseps,'k')
+        axis2.plot(frequencies, phasens,'k')
+        plt.xscale('log')
+
+        axis1.set_xlabel("Frequency [Hz]")
+        axis2.set_xlabel("Frequency [Hz]")
+        axis1.set_ylabel("Response")
+        axis2.set_ylabel("Phase [rad]")
+        axis1.grid(True)
+        axis2.grid(True)
+        plt.show()
+
+
 if __name__ == "__main__":
     R1 = Resistor(10000)
     R2 = Resistor(5000)
@@ -113,4 +152,5 @@ if __name__ == "__main__":
 
     Divider(Z1,Z2).showResponse()
     Divider(R1,R2).showResponse()
-
+    opamp = OpAmp(Divider(Z1,Z2),Divider(R1,R2))
+    opamp.showResponse()
