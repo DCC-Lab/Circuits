@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from impedance import *
+from component import *
 
 class TestComponent(unittest.TestCase):
     def testSimpleComponent(self):
