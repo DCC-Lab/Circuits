@@ -117,7 +117,7 @@ class Component:
         for f in frequencies:
             v = self.voltageAt(terminal=terminal, frequency=f, vs=1.0)
             amplitude.append(abs(v))
-            phase.append(angle(f))
+            phase.append(angle(v))
         fig,(axis1,axis2) = plt.subplots(1,2, sharex=True,figsize=(10,5))
         axis1.plot(frequencies, amplitude,'k')
         plt.xscale('log')
@@ -257,11 +257,16 @@ class Series(Component):
 
 class OpAmpAnalysis:
     def __init__(self, vp, pTerm, vn, nTerm):
+        """ OpAmps cannot be "modelled" easily so this is a simple "tool" to visualize
+        the voltages at both inputs (+ and -).  The idea is that there will be a stable
+        operation if both + and - can operate with the same voltages."""
         self.vp = vp
         self.pTerm = pTerm
         self.vn = vn
         self.nTerm = nTerm
     def showInputs(self):
+        """ We will have a stable operating point if V+ and V- can have the same
+        amplitude AND the same phase. """
         vps = []
         phaseps = []
         vns = []
@@ -298,11 +303,15 @@ class OpAmpAnalysis:
 if __name__ == "__main__":
 
     R = Resistor(10000)
+    R.showImpedanceResponse()
     C = Capacitor(1e-6)
     C.showImpedanceResponse()
     
-    divider = Series(R, C, "Low pass RC filter")
-    divider.showImpedanceResponse()
+    lowPass = Series(R, C, "Low pass RC filter")
+    lowPass.showVoltageResponse(terminal=2)
+
+    highPass = Series(C, R, "High pass RC filter")
+    highPass.showVoltageResponse(terminal=2)
 
     R = Resistor(10000)
     C = Capacitor(1e-6)
