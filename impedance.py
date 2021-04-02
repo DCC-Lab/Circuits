@@ -34,6 +34,10 @@ class Component:
         self.terminals = (1,0)
         self.label = label if label is not None else "Component"
 
+    def __str__(self):
+        """ String representation """
+        return self.label
+
     def __repr__(self):
         """ Representation of the component with its terminals """
         string  = "\n"
@@ -138,7 +142,7 @@ class Resistor(Component):
         """ A resistor of R Ohms """
         Component.__init__(self, label)
         self.R = R
-        self.label = label if (label is not None) else "Resistor"
+        self.label = label if (label is not None) else "Resistor [{0} Ω]".format(R)
 
     def __repr__(self):
         """ Representation of the component with its terminals """
@@ -156,7 +160,7 @@ class Capacitor(Component):
         """ A capacitor of C Farads (typically ~1e-6)"""
         Component.__init__(self, label)
         self.C = C
-        self.label = label if (label is not None) else "Capacitor"
+        self.label = label if (label is not None) else "Capacitor [{0} µF]".format(C*1e6)
 
     def __repr__(self):
         """ Representation of the component with its terminals """
@@ -177,7 +181,7 @@ class Inductor(Component):
         """ Am inductor of L Henry (typically ~1e-3)"""
         Component.__init__(self, label)
         self.L = L       
-        self.label = label if (label is not None) else "Inductor"
+        self.label = label if (label is not None) else "Inductor [{0} mH]".format(L*1000)
 
     def __repr__(self):
         """ Representation of the component with its terminals """
@@ -200,7 +204,7 @@ class Parallel(Component):
         Component.__init__(self, label=label)
         self.z1 = z1
         self.z2 = z2
-        self.label = label if (label is not None) else "z1 z2 in parallel"
+        self.label = label if (label is not None) else "{0} {1} in parallel".format(z1,z2)
     def __repr__(self):
         """ Representation of the component with its terminals """        
         string  = "                ┏━━━━┓\n"
@@ -223,7 +227,7 @@ class Series(Component):
         Component.__init__(self, label=label)
         self.z1 = z1
         self.z2 = z2
-        self.label = label if (label is not None) else "Z1+Z2 divider"
+        self.label = label if (label is not None) else "{0}+{1} divider".format(z1,z2)
 
     def __repr__(self):
         """ Representation of the component with its terminals. The terminal

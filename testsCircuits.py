@@ -7,13 +7,13 @@ class TestComponent(unittest.TestCase):
         self.assertIsNotNone(Component())
 
     def testSimpleResistor(self):
-        self.assertTrue(Resistor(100).label == "Resistor")
+        self.assertTrue(Resistor(100).label == "Resistor [100 Ω]")
 
     def testPrintComponent(self):
         print("\n",Component())
         print("\n",Resistor(R=100))
-        print("\n",Capacitor(C=100))
-        print("\n",Inductor(L=100))
+        print("\n",Capacitor(C=1e-6))
+        print("\n",Inductor(L=1e-3))
 
     def testInitValuesComponents(self):
         z = Resistor(R=100)
@@ -21,23 +21,23 @@ class TestComponent(unittest.TestCase):
         self.assertAlmostEqual(z.impedance(), 100)
         self.assertAlmostEqual(z.impedance(frequency=200), 100)
 
-        z = Capacitor(C=100)
+        z = Capacitor(C=1e-6)
         self.assertIsNone(z.impedance())
-        self.assertAlmostEqual(z.impedance(frequency=200), 1/2j/np.pi/200/100)
+        self.assertAlmostEqual(z.impedance(frequency=200), 1/2j/np.pi/200/1e-6)
 
-        z = Inductor(L=100)
+        z = Inductor(L=1e-3)
         self.assertIsNone(z.impedance())
-        self.assertAlmostEqual(z.impedance(frequency=200), 2j*np.pi*200*100)
+        self.assertAlmostEqual(z.impedance(frequency=200), 2j*np.pi*200*1e-3)
 
     # @unittest.skip
     def testShowResponse(self):
         z = Resistor(R=100)
         z.showComponentResponse()
 
-        z = Capacitor(C=100)
+        z = Capacitor(C=1e-6)
         z.showComponentResponse()
 
-        z = Inductor(L=100)
+        z = Inductor(L=1e-3)
         z.showComponentResponse()
 
     def testSeriesComponent(self):
@@ -72,10 +72,10 @@ class TestComponent(unittest.TestCase):
         z = Resistor(R=100)
         z.showVoltageResponse()
 
-        z = Capacitor(C=100)
+        z = Capacitor(C=1e-6)
         z.showVoltageResponse()
 
-        z = Inductor(L=100)
+        z = Inductor(L=1e-3)
         z.showVoltageResponse()
 
         z1 = Resistor(R=100)
