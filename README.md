@@ -13,3 +13,12 @@ or
 ```
 python testsCircuits.py
 ```
+
+![resistor](README.assets/resistor.png)
+
+![capacitor](README.assets/capacitor.png)
+
+![highpass](README.assets/highpass.png)
+
+![lowpass](README.assets/lowpass.png)
+
