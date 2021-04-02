@@ -26,15 +26,65 @@ class TestImpedance(unittest.TestCase):
         self.assertIsNone(z.impedance())
         self.assertAlmostEqual(z.impedance(frequency=200), 2j*np.pi*200*100)
 
+    @unittest.skip
     def testShowResponse(self):
         z = Resistor(R=100)
         z.showImpedanceResponse()
-        
+
         z = Capacitor(C=100)
         z.showImpedanceResponse()
 
         z = Inductor(L=100)
         z.showImpedanceResponse()
+
+    def testSeriesImpedance(self):
+        z1 = Resistor(R=100)
+        z2 = Resistor(R=200)
+        series = Series(z1,z2)
+        self.assertAlmostEqual(series.impedance(), 300)
+        self.assertAlmostEqual(series.impedance(), z1.impedance()+z2.impedance())
+        self.assertAlmostEqual(series.impedance(terminalPlus=2, terminalMinus=0), 200)
+        self.assertAlmostEqual(series.impedance(terminalPlus=1, terminalMinus=2), 100)
+
+    def testParallelImpedance(self):
+        z1 = Resistor(R=100)
+        z2 = Resistor(R=200)
+        parallel = Parallel(z1,z2)
+        self.assertAlmostEqual(parallel.impedance(), 200/3)
+
+    def testSeriesVoltage(self):
+        z1 = Resistor(R=100)
+        z2 = Resistor(R=200)
+        series = Series(z1,z2)
+        self.assertAlmostEqual(series.voltageAt(terminal=2), 1*200/(100+200))
+
+    def testParallelVoltage(self):
+        z1 = Resistor(R=100)
+        z2 = Resistor(R=200)
+        parallel = Parallel(z1,z2)
+        self.assertAlmostEqual(parallel.voltageAt(terminal=1), 1)
+
+    @unittest.skip
+    def testShowResponse(self):
+        z = Resistor(R=100)
+        z.showVoltageResponse()
+
+        z = Capacitor(C=100)
+        z.showVoltageResponse()
+
+        z = Inductor(L=100)
+        z.showVoltageResponse()
+
+        z1 = Resistor(R=100)
+        z2 = Resistor(R=200)
+        Parallel(z1,z2).showVoltageResponse()
+        Series(z1,z2).showVoltageResponse()
+
+    def testShowRCFilter(self):
+        r = Resistor(R=100)
+        c = Capacitor(C=1e-6)
+        Series(r,c).showVoltageResponse(terminal=2)
+        Series(c,r).showVoltageResponse(terminal=2)
 
 if __name__ == '__main__':
     unittest.main()

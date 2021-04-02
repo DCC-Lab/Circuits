@@ -38,13 +38,13 @@ class Impedance:
     def connectInSeriesWith(self, impedance):
         return Series(z1=self, z2=impedance)
 
-    def showImpedanceResponse(self):
+    def showImpedanceResponse(self, terminal=1):
         amplitude = []
         phase = []
 
         frequencies = 10**(linspace(-1,6,100))
         for frequency in frequencies:
-            z = self.impedance(frequency=frequency)
+            z = self.impedance(frequency=frequency, terminalPlus=terminal)
             amplitude.append(abs(z))
             phase.append(angle(z))
         fig,(axis1,axis2) = plt.subplots(1,2, sharex=True,figsize=(10,5))
@@ -60,6 +60,30 @@ class Impedance:
         axis1.grid(True)
         axis2.grid(True)
         plt.show()
+
+    def showVoltageResponse(self, terminal=2):
+        amplitude = []
+        phase = []
+
+        frequencies = 10**(linspace(-1,6,100))
+        for f in frequencies:
+            v = self.voltageAt(terminal=terminal, frequency=f, vs=1.0)
+            amplitude.append(abs(v))
+            phase.append(angle(f))
+        fig,(axis1,axis2) = plt.subplots(1,2, sharex=True,figsize=(10,5))
+        axis1.plot(frequencies, amplitude,'k')
+        plt.xscale('log')
+        axis2.plot(frequencies, phase,'k')
+        plt.xscale('log')
+
+        axis1.set_xlabel("Frequency [Hz]")
+        axis2.set_xlabel("Frequency [Hz]")
+        axis1.set_ylabel("Response with 1V source")
+        axis2.set_ylabel("Phase [rad]")
+        axis1.grid(True)
+        axis2.grid(True)
+        plt.show()
+
 
 class Resistor(Impedance):
     def __init__(self, R):
@@ -84,7 +108,7 @@ class Capacitor(Impedance):
         string += " terminal 1 ━━━┃ C ┃━━━ terminal 0\n"
         string += "               ┃   ┃ \n"
         return string
-    def impedance(self, frequency=None):
+    def impedance(self, frequency=None, terminalPlus=1, terminalMinus=0):
         if frequency is None:
             return None
         return 1/(1j*2*pi*frequency*self.C)
@@ -99,7 +123,7 @@ class Inductor(Impedance):
         string += " terminal 1 ━━━  L   ━━━ terminal 0\n"
         string += "               ︘︘︘"
         return string
-    def impedance(self, frequency=None):
+    def impedance(self, frequency=None, terminalPlus=1, terminalMinus=0):
         if frequency is None:
             return None
         return 1j*2*pi*frequency*self.L
@@ -117,8 +141,8 @@ class Parallel(Impedance):
         string += "            ┃   ┏━━━━┓   ┃\n"
         string += "            ┗━━━┫ Z2 ┣━━━┛\n"
         string += "                ┗━━━━┛ "
-    def impedance(self, frequency=None):
-        return 1/(1/self.z1.Z(frequency) + 1/self.z2.Z(frequency))
+    def impedance(self, frequency=None, terminalPlus=1, terminalMinus=0):
+        return 1/(1/self.z1.impedance(frequency) + 1/self.z2.impedance(frequency))
 
 class Series(Impedance):
     def __init__(self, z1, z2):
@@ -133,11 +157,11 @@ class Series(Impedance):
 
     def impedance(self, frequency=None, terminalPlus=1, terminalMinus=0):
         if terminalPlus == 1 and terminalMinus == 0:
-            return self.z1.Z(frequency) + self.z2.Z(frequency)
+            return self.z1.impedance(frequency) + self.z2.impedance(frequency)
         elif terminalPlus == 2 and terminalMinus == 0:
-            return self.z2.Z(frequency)
+            return self.z2.impedance(frequency)
         elif terminalPlus == 1 and terminalMinus == 2:
-            return self.z1.Z(frequency)
+            return self.z1.impedance(frequency)
 
     def voltageAt(self, terminal=2, vs=1.0, frequency=None):
         """ Returns the voltage with respect to ground at the terminal.
@@ -151,45 +175,14 @@ class Series(Impedance):
         """
         return Impedance.voltageAt(self, terminal, vs, frequency)
 
-class Divider:
-    def __init__(self, z1, z2):
-        self.z1 = z1
-        self.z2 = z2
-        self.zt = z1.connectInSeriesWith(z2)
-
-    def voltage(self, frequency):
-        return self.z1.Z(frequency)/self.zt.Z(frequency)
-
-    def showResponse(self):
-        amplitude = []
-        phase = []
-
-        frequencies = 10**(linspace(-1,6,100))
-        for f in frequencies:
-            v = self.voltage(f)
-            amplitude.append(abs(v))
-            phase.append(angle(f))
-        fig,(axis1,axis2) = plt.subplots(1,2, sharex=True,figsize=(10,5))
-        axis1.plot(frequencies, amplitude,'k')
-        plt.xscale('log')
-        axis2.plot(frequencies, phase,'k')
-        plt.xscale('log')
-
-        axis1.set_xlabel("Frequency [Hz]")
-        axis2.set_xlabel("Frequency [Hz]")
-        axis1.set_ylabel("Response")
-        axis2.set_ylabel("Phase [rad]")
-        axis1.grid(True)
-        axis2.grid(True)
-        plt.show()
-
-
 
 class OpAmp:
-    def __init__(self, vp, vn):
+    def __init__(self, vp, pTerm, vn, nTerm):
         self.vp = vp
+        self.pTerm = pTerm
         self.vn = vn
-    def showResponse(self):
+        self.nTerm = nTerm
+    def showInputs(self):
         vps = []
         phaseps = []
         vns = []
@@ -197,20 +190,22 @@ class OpAmp:
 
         frequencies = 10**(linspace(-1,6,100))
         for f in frequencies:
-            vp = self.vp.voltage(f)
+            vp = self.vp.voltageAt(frequency=f, terminal=self.pTerm)
             vps.append(abs(vp))
             phaseps.append(angle(vp))
-            vn = self.vn.voltage(f)
+            vn = self.vn.voltageAt(frequency=f, terminal=self.nTerm)
             vns.append(abs(vn))
             phasens.append(angle(vn))
         fig,(axis1,axis2) = plt.subplots(1,2, sharex=True,figsize=(10,5))
-        axis1.plot(frequencies, vps,'k')
-        axis1.plot(frequencies, vns,'k')
+        axis1.plot(frequencies, vps,'k+')
+        axis1.plot(frequencies, vns,'k|')
         plt.xscale('log')
-        axis2.plot(frequencies, phaseps,'k')
-        axis2.plot(frequencies, phasens,'k')
+        axis2.plot(frequencies, phaseps,'k+')
+        axis2.plot(frequencies, phasens,'k|')
         plt.xscale('log')
 
+        axis1.set_title("+ input of OpAmp")
+        axis2.set_title("- input of OpAmp")
         axis1.set_xlabel("Frequency [Hz]")
         axis2.set_xlabel("Frequency [Hz]")
         axis1.set_ylabel("Response")
@@ -226,10 +221,5 @@ if __name__ == "__main__":
 
     R = Resistor(10000)
     C = Capacitor(1e-6)
-    Z1 = R.connectInSeriesWith(C)
-    Z2 = R.connectInParallelWith(C)
-
-    # Divider(Z1,Z2).showResponse()
-    # Divider(R1,R2).showResponse()
-    opamp = OpAmp(Divider(R,C),Divider(R,R))
-    opamp.showResponse()
+    opamp = OpAmp(vp=Series(R,C), pTerm=2, vn=Series(R,R), nTerm=2)
+    opamp.showInputs()
