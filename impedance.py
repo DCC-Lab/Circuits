@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 
 
 class Impedance:
-    def __init__(self):
+    def __init__(self, label=None):
         self.terminals = (1,0)
+        self.label = label if label is not None else "Impedance"
 
     def __repr__(self):
         string  = "\n"
@@ -53,6 +54,7 @@ class Impedance:
         axis2.plot(frequencies, phase,'k')
         plt.xscale('log')
 
+        axis1.set_title(self.label)
         axis1.set_xlabel("Frequency [Hz]")
         axis2.set_xlabel("Frequency [Hz]")
         axis1.set_ylabel(r"Impedance [$\Omega$]")
@@ -75,7 +77,7 @@ class Impedance:
         plt.xscale('log')
         axis2.plot(frequencies, phase,'k')
         plt.xscale('log')
-
+        axis1.set_title(self.label)
         axis1.set_xlabel("Frequency [Hz]")
         axis2.set_xlabel("Frequency [Hz]")
         axis1.set_ylabel("Response with 1V source")
@@ -86,9 +88,11 @@ class Impedance:
 
 
 class Resistor(Impedance):
-    def __init__(self, R):
-        Impedance.__init__(self)
+    def __init__(self, R, label=None):
+        Impedance.__init__(self, label)
         self.R = R
+        self.label = label if (label is not None) else "Resistor"
+
     def __repr__(self):
         string  = "\n"
         string += "               ┏━━━┓ \n"
@@ -99,9 +103,11 @@ class Resistor(Impedance):
         return self.R
 
 class Capacitor(Impedance):
-    def __init__(self, C):
-        Impedance.__init__(self)
+    def __init__(self, C, label=None):
+        Impedance.__init__(self, label)
         self.C = C
+        self.label = label if (label is not None) else "Capacitor"
+
     def __repr__(self):
         string  = "\n"
         string += "               ┃   ┃ \n"
@@ -114,9 +120,11 @@ class Capacitor(Impedance):
         return 1/(1j*2*pi*frequency*self.C)
 
 class Inductor(Impedance):
-    def __init__(self, L):
-        Impedance.__init__(self)
+    def __init__(self, L, label=None):
+        Impedance.__init__(self, label)
         self.L = L       
+        self.label = label if (label is not None) else "Inductor"
+
     def __repr__(self):
         string  = "\n"
         string += "               ︗︗︗\n"
@@ -130,10 +138,11 @@ class Inductor(Impedance):
 
 
 class Parallel(Impedance):
-    def __init__(self, z1, z2):
-        Impedance.__init__(self)
+    def __init__(self, z1, z2, label=None):
+        Impedance.__init__(self, label=label)
         self.z1 = z1
         self.z2 = z2
+        self.label = label if (label is not None) else "z1 z2 in parallel"
     def __repr__(self):
         string  = "                ┏━━━━┓\n"
         string += "            ┏━━━┫ Z1 ┣━━━┓\n"
@@ -145,10 +154,11 @@ class Parallel(Impedance):
         return 1/(1/self.z1.impedance(frequency) + 1/self.z2.impedance(frequency))
 
 class Series(Impedance):
-    def __init__(self, z1, z2):
-        Impedance.__init__(self)
+    def __init__(self, z1, z2, label=None):
+        Impedance.__init__(self, label=label)
         self.z1 = z1
         self.z2 = z2
+        self.label = label if (label is not None) else "z1-z2 divider"
 
     def __repr__(self):
         string  = "               ┏━━━━┓              ┏━━━━┓\n"
@@ -176,7 +186,7 @@ class Series(Impedance):
         return Impedance.voltageAt(self, terminal, vs, frequency)
 
 
-class OpAmp:
+class OpAmpAnalysis:
     def __init__(self, vp, pTerm, vn, nTerm):
         self.vp = vp
         self.pTerm = pTerm
@@ -205,6 +215,7 @@ class OpAmp:
         plt.xscale('log')
 
         axis1.set_title("+ input of OpAmp")
+
         axis2.set_title("- input of OpAmp")
         axis1.set_xlabel("Frequency [Hz]")
         axis2.set_xlabel("Frequency [Hz]")

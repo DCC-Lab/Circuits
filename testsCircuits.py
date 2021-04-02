@@ -6,6 +6,9 @@ class TestImpedance(unittest.TestCase):
     def testSimpleImpedance(self):
         self.assertIsNotNone(Impedance())
 
+    def testSimpleResistor(self):
+        self.assertTrue(Resistor(100).label == "Resistor")
+
     def testPrintImpedance(self):
         print("\n",Impedance())
         print("\n",Resistor(R=100))
@@ -26,7 +29,7 @@ class TestImpedance(unittest.TestCase):
         self.assertIsNone(z.impedance())
         self.assertAlmostEqual(z.impedance(frequency=200), 2j*np.pi*200*100)
 
-    @unittest.skip
+    # @unittest.skip
     def testShowResponse(self):
         z = Resistor(R=100)
         z.showImpedanceResponse()
@@ -64,7 +67,7 @@ class TestImpedance(unittest.TestCase):
         parallel = Parallel(z1,z2)
         self.assertAlmostEqual(parallel.voltageAt(terminal=1), 1)
 
-    @unittest.skip
+    # @unittest.skip
     def testShowResponse(self):
         z = Resistor(R=100)
         z.showVoltageResponse()
@@ -83,8 +86,10 @@ class TestImpedance(unittest.TestCase):
     def testShowRCFilter(self):
         r = Resistor(R=100)
         c = Capacitor(C=1e-6)
-        Series(r,c).showVoltageResponse(terminal=2)
-        Series(c,r).showVoltageResponse(terminal=2)
+        lowPass = Series(r,c, label="Low-pass RC filter")
+        lowPass.showVoltageResponse(terminal=2)
+        highPass = Series(c,r, label="High-pass RC filter")
+        highPass.showVoltageResponse(terminal=2)
 
 if __name__ == '__main__':
     unittest.main()
