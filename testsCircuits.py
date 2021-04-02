@@ -2,20 +2,20 @@ import unittest
 import numpy as np
 from impedance import *
 
-class TestImpedance(unittest.TestCase):
-    def testSimpleImpedance(self):
-        self.assertIsNotNone(Impedance())
+class TestComponent(unittest.TestCase):
+    def testSimpleComponent(self):
+        self.assertIsNotNone(Component())
 
     def testSimpleResistor(self):
         self.assertTrue(Resistor(100).label == "Resistor")
 
-    def testPrintImpedance(self):
-        print("\n",Impedance())
+    def testPrintComponent(self):
+        print("\n",Component())
         print("\n",Resistor(R=100))
         print("\n",Capacitor(C=100))
         print("\n",Inductor(L=100))
 
-    def testInitValuesImpedances(self):
+    def testInitValuesComponents(self):
         z = Resistor(R=100)
         self.assertIsNotNone(z.impedance())
         self.assertAlmostEqual(z.impedance(), 100)
@@ -32,15 +32,15 @@ class TestImpedance(unittest.TestCase):
     # @unittest.skip
     def testShowResponse(self):
         z = Resistor(R=100)
-        z.showImpedanceResponse()
+        z.showComponentResponse()
 
         z = Capacitor(C=100)
-        z.showImpedanceResponse()
+        z.showComponentResponse()
 
         z = Inductor(L=100)
-        z.showImpedanceResponse()
+        z.showComponentResponse()
 
-    def testSeriesImpedance(self):
+    def testSeriesComponent(self):
         z1 = Resistor(R=100)
         z2 = Resistor(R=200)
         series = Series(z1,z2)
@@ -49,7 +49,7 @@ class TestImpedance(unittest.TestCase):
         self.assertAlmostEqual(series.impedance(terminalPlus=2, terminalMinus=0), 200)
         self.assertAlmostEqual(series.impedance(terminalPlus=1, terminalMinus=2), 100)
 
-    def testParallelImpedance(self):
+    def testParallelComponent(self):
         z1 = Resistor(R=100)
         z2 = Resistor(R=200)
         parallel = Parallel(z1,z2)
